@@ -36,22 +36,38 @@ const data = {
       icon: SquareTerminal,
       isActive: true,
       items: [
+        // {
+        //   title: "Session",
+        //   url: "/dashboard/session",
+        // },
         {
-          title: "Faculty",
-          url: "#",
+          title: "Dashboard",
+          url: "/dashboard/home",
         },
-        {
-          title: "Department",
-          url: "/dashboard/departments",
-        },
-        {
-          title: "Students",
-          url: "/dashboard/students",
-        },
-        {
-          title: "Course",
-          url: "/dashboard/courses",
-        },
+        // {
+        //   title: "Sessions",
+        //   url: "/dashboard/sessions",
+        // },
+        // {
+        //   title: "Result",
+        //   url: "/dashboard/result",
+        // },
+        // {
+        //   title: "Faculty",
+        //   url: "/dashboard/faculty",
+        // },
+        // {
+        //   title: "Department",
+        //   url: "/dashboard/departments",
+        // },
+        // {
+        //   title: "Students",
+        //   url: "/dashboard/students",
+        // },
+        // {
+        //   title: "Course",
+        //   url: "/dashboard/courses",
+        // },
       ],
     },
     {

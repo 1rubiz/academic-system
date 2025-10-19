@@ -44,12 +44,20 @@ import SenateGroupHeaderA from "./pages/result/SenateGroupHeaderA";
 import SeneteGroupHeaderB from "./pages/result/SeneteGroupHeaderB";
 import SenateFormat from "./pages/result/SenateFormat";
 import SenateFinalYear from "./pages/result/SenateFinalYear";
+import SessionManager from "./pages/create/Session";
+import SessionPage from "./pages/create/Sessions";
+import ResultEntry from "./pages/create/Results";
+import AcademicRecordDashboard from "./pages/create/Dashboard";
+// import { useEffect } from "react";
 
 
 
 export default function App() {
   const isDev = import.meta.env.DEV; // Vite env check
   const RouterImpl = isDev ? BrowserRouter : HashRouter;
+  // useEffect(()=>{
+  //   console.log(window.api.sendMessage())
+  // }, [])
   return (
     <div className="bg-purple-800 w-screen">
        <Loading/>
@@ -59,9 +67,15 @@ export default function App() {
               <Route path="/" element={<Auth />} />
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<Home />} />
+                <Route path="/dashboard/home" element={<AcademicRecordDashboard />} />
                 <Route path="/dashboard/courses" element={<CoursePage />} />
                 <Route path="/dashboard/students" element={<StudentPage />} />
                 <Route path="/dashboard/departments" element={<Department />} />
+                <Route path="/dashboard/faculty" element={<Faculty />} />
+                <Route path="/dashboard/session" element={<SessionManager/>} />
+                <Route path="/dashboard/sessions" element={<SessionPage/>} />
+                <Route path="/dashboard/result" element={<ResultEntry/>} />
+
 
 
                 {/* more routes */}

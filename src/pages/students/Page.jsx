@@ -1,146 +1,190 @@
-// app/students/page.tsx
-"use client";
-
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
-// type Department = {
-//   id: number;
-//   name: string;
-// };
-
-// type Student = {
-//   id: number;
-//   matric_no: string;
-//   first_name: string;
-//   last_name: string;
-//   level: number;
-//   department_name: string;
-//   is_suspended: boolean;
-// };
-
-export default function StudentPage() {
-  const [students, setStudents] = useState([]);
-  const [departments, setDepartments] = useState([]);
+export default function StudentPage({ facultyId, department, level, onComplete }) {
+  const [tab, setTab] = useState("conventional"); // "conventional" | "byMatric"
   const [matricNo, setMatricNo] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [level, setLevel] = useState(100);
-  const [departmentId, setDepartmentId] = useState(null);
-
-  const fetchData = async () => {
-    const [depts, studs] = await Promise.all([
-      window.api.getDepartments(),
-      window.api.getStudents(),
-    ]);
-    setDepartments(depts);
-    setStudents(studs);
-  };
+  const [searchResult, setSearchResult] = useState(null);
+  const [mode, setMode] = useState('u')
+  const [loading, setLoading] = useState(false);
 
   const handleAdd = async () => {
-    if (!departmentId) return alert("Select a department first!");
-    await window.api.addStudent(matricNo, firstName, lastName, level, departmentId);
+    if (!department) return alert("Select a department first!");
+    await window.api.students.addStudent({
+      matric_no: matricNo,
+      first_name: firstName,
+      last_name: lastName,
+      level,
+      department_id: department.id,
+      faculty_id: facultyId,
+    });
     setMatricNo("");
     setFirstName("");
     setLastName("");
-    setLevel(100);
-    fetchData();
+    onComplete();
   };
 
-  const handleSuspend = async (id, suspended) => {
-    if (suspended) {
-      await window.api.unsuspendStudent(id);
-    } else {
-      await window.api.suspendStudent(id);
-    }
-    fetchData();
+  const handleSearch = async () => {
+    if (!matricNo) return alert("Enter a matric number!");
+    setLoading(true);
+    const res = await window.api.students.serchByMatric(matricNo);
+    setSearchResult(res.success ? res.student : null);
+    setLoading(false);
   };
 
-  const handleDelete = async (id) => {
-    await window.api.removeStudent(id);
-    fetchData();
+  const handleAddExisting = async () => {
+    if (!searchResult) return;
+    const res = await window.api.students.addStudent({
+      matric_no: searchResult.matric_no,
+      first_name: searchResult.first_name,
+      last_name: searchResult.last_name,
+      level,
+      department_id: searchResult.department_id,
+      faculty_id: searchResult.faculty_id,
+    });
+    alert(res.message);
+    onComplete();
+    handleSearch(); // refresh
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const handleDelete = async () => {
+    if (!searchResult) return;
+    if (!confirm("Remove this student from the current level?")) return;
+    await window.api.students.updateStudent(searchResult.id, {
+      [`is_${level}_active`]: 0,
+    });
+    alert("Student removed from level successfully.");
+    handleSearch();
+  };
 
   return (
     <div className="max-w-3xl mx-auto p-4 space-y-6">
       <h1 className="text-2xl font-bold">Students</h1>
 
-      {/* Add form */}
-      <div className="grid grid-cols-6 gap-2 items-center">
-        <Input
-          placeholder="Matric No"
-          value={matricNo}
-          onChange={(e) => setMatricNo(e.target.value)}
-        />
-        <Input
-          placeholder="First Name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-        />
-        <Input
-          placeholder="Last Name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-        />
-        <Input
-          type="number"
-          placeholder="Level"
-          value={level}
-          onChange={(e) => setLevel(parseInt(e.target.value))}
-        />
-        <Select onValueChange={(val) => setDepartmentId(Number(val))}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select Dept" />
-          </SelectTrigger>
-          <SelectContent>
-            {departments.map((d) => (
-              <SelectItem key={d.id} value={String(d.id)}>
-                {d.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button onClick={handleAdd}>Register</Button>
+      {/* Tabs */}
+      <div className="w-full grid grid-cols-2 gap-4">
+        <div className={`col-span-1 w-full flex items-center cursor-pointer justify-center text-white py-1.5 ${tab === 'conventional' ? 'bg-slate-800' : 'bg-slate-400'}`}
+          variant={tab === "conventional" ? "default" : "secondary"}
+          onClick={() => setTab("conventional")}
+        >
+          Add New
+        </div>
+        <div className={`col-span-1 w-full flex items-center cursor-pointer justify-center text-white py-1.5 ${tab === 'byMatric' ? 'bg-slate-800' : 'bg-slate-400'}`}
+          variant={tab === "byMatric" ? "default" : "secondary"}
+          onClick={() => setTab("byMatric")}
+        >
+          Add by Matric No
+        </div>
       </div>
 
-      {/* List */}
-      <ul className="space-y-2">
-        {students.map((s) => (
-          <li
-            key={s.id}
-            className="flex justify-between items-center p-2 border rounded"
-          >
-            <span>
-              {s.matric_no} – {s.first_name} {s.last_name} (Lvl {s.level}) [{s.department_name}]
-              {s.is_suspended && (
-                <span className="ml-2 text-red-500 text-sm">(Suspended)</span>
+      {/* Conventional Add */}
+      {tab === "conventional" && (
+        <div className="grid grid-cols-6 gap-2 items-center">
+          <label htmlFor="mat" className="col-span-3">
+            Mat Number
+            <Input
+              id='mat'
+                placeholder="Matric No"
+                value={matricNo}
+                onChange={(e) => setMatricNo(e.target.value)}
+              />
+          </label>
+          <label htmlFor="" className="col-span-3">
+            First Name
+            <Input
+              placeholder="First Name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="col-span-3"
+            />
+          </label>
+          <label htmlFor="" className="col-span-3">
+            Last Name
+            <Input
+              placeholder="Last Name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="col-span-3"
+            />
+          </label>
+          <label htmlFor="" className="col-span-3">
+            Mode of Entry
+            <Input
+              placeholder="Mode of Entry"
+              value={mode.toUpperCase()}
+              onChange={(e) => setMode(e.target.value)}
+              className="col-span-3"
+            />
+          </label>
+          <label htmlFor="" className="col-span-6">
+            Department
+            <Input
+              placeholder="Department"
+              value={department?.name || ""}
+              readOnly
+              className="col-span-3"
+            />
+          </label>
+          <div className="col-span-6 cursor-pointer rounded-md flex items-center text-white justify-center py-2 bg-blue-400" onClick={handleAdd}>
+            Register
+          </div>
+        </div>
+      )}
+
+      {/* Add by Matric */}
+      {tab === "byMatric" && (
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <Input
+              placeholder="Search Matric No"
+              value={matricNo}
+              onChange={(e) => setMatricNo(e.target.value)}
+            />
+            <Button onClick={handleSearch} disabled={loading}>
+              {loading ? "Searching..." : "Search"}
+            </Button>
+          </div>
+
+          {searchResult && (
+            <div className="p-3 border rounded-md space-y-2">
+              <div>
+                <strong>{searchResult.matric_no}</strong> —{" "}
+                {searchResult.first_name} {searchResult.last_name}
+              </div>
+              <div className="text-sm text-gray-500">
+                {searchResult.department_name} | Faculty:{" "}
+                {searchResult.faculty_name}
+              </div>
+
+              {searchResult[`is_${level}_active`] ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-green-600 font-semibold">
+                    Already in level {level}
+                  </span>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDelete}
+                  >
+                    Remove from Level
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  className="bg-blue-400"
+                  size="sm"
+                  onClick={handleAddExisting}
+                >
+                  Add to Level {level}
+                </Button>
               )}
-            </span>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant={s.is_suspended ? "default" : "secondary"}
-                onClick={() => handleSuspend(s.id, s.is_suspended)}
-              >
-                {s.is_suspended ? "Unsuspend" : "Suspend"}
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={() => handleDelete(s.id)}
-              >
-                Delete
-              </Button>
             </div>
-          </li>
-        ))}
-      </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 }

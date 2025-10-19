@@ -38,12 +38,13 @@ export const CourseRepo = {
     code: string,
     unit: number,
     department_id: number,
-    lecturer_id?: number
+    lecturer_id?: number,
+    description?: string
   ) => {
     const stmt = db.prepare(
       "INSERT INTO courses (name, code, unit, department_id, lecturer_id) VALUES (?, ?, ?, ?, ?)"
     );
-    return stmt.run(name, code, unit, department_id, lecturer_id || null);
+    return stmt.run(name, code, unit, department_id, lecturer_id || null, description);
   },
 
   update: (
@@ -52,14 +53,15 @@ export const CourseRepo = {
     code: string,
     unit: number,
     department_id: number,
-    lecturer_id?: number
+    lecturer_id?: number,
+    description?: string
   ) => {
     const stmt = db.prepare(
       `UPDATE courses 
        SET name = ?, code = ?, unit = ?, department_id = ?, lecturer_id = ? 
        WHERE id = ?`
     );
-    return stmt.run(name, code, unit, department_id, lecturer_id || null, id);
+    return stmt.run(name, code, unit, department_id, lecturer_id || null, id, description);
   },
 
   remove: (id: number) => {
