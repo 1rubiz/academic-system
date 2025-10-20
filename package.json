@@ -2,47 +2,68 @@
   "name": "academic-records",
   "private": true,
   "version": "0.0.0",
+  "author": {
+    "name": "Ruby Izekor",
+    "email": "1izekorruby@gmail.com"
+  },
   "type": "module",
   "main": "electron/main.js",
   "scripts": {
-    "dev": "concurrently \"vite --port 5174\" \"wait-on http://localhost:5174 && electron .\"",
+    "dev": "concurrently \"vite --port 5174\" \"wait-on http://localhost:5174 && ELECTRON_DISABLE_SANDBOX=1 electron .\"",
     "build": "vite build",
-    "start": "electron .",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postinstall": "electron-rebuild",
+    "postinstall": "electron-builder install-app-deps",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
-    "release": "electron-builder --publish always"
+    "release": "electron-builder --publish always",
+    "build:web": "vite build",
+    "build:electron": "electron-builder",
+    "dist": "npm run build:web && npm run build:electron"
   },
   "build": {
     "appId": "com.yourcompany.yourapp",
     "productName": "Academic System - Ruby",
     "directories": {
-      "output": "dist"
+      "output": "realease"
     },
     "files": [
-      "build/**/*",
-      "main.js",
-      "preload.js",
+      "dist/**/*",
+      "electron/main.js",
+      "electron/preload.js",
       "package.json"
     ],
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "icon.ico"
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "category": "Utility"
     },
     "mac": {
       "target": "dmg"
     },
     "publish": [
-    {
-      "provider": "github",
-      "owner": "1rubiz",
-      "repo": "https://github.com/1rubiz/academic-records.git"
-    }
-  ]
+      {
+        "provider": "github",
+        "owner": "1rubiz",
+        "repo": "https://github.com/1rubiz/academic-records.git"
+      }
+    ]
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.10",
@@ -59,7 +80,7 @@
     "better-sqlite3": "^12.4.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "electron": "^37.2.6",
+    "electron-updater": "^6.6.2",
     "exceljs": "^4.4.0",
     "lucide-react": "^0.539.0",
     "path": "^0.12.7",
@@ -80,6 +101,8 @@
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.21",
     "concurrently": "^9.2.0",
+    "electron": "^37.2.6",
+    "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",

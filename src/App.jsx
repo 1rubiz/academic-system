@@ -48,16 +48,16 @@ import SessionManager from "./pages/create/Session";
 import SessionPage from "./pages/create/Sessions";
 import ResultEntry from "./pages/create/Results";
 import AcademicRecordDashboard from "./pages/create/Dashboard";
-// import { useEffect } from "react";
+import { useEffect } from "react";
 
 
 
 export default function App() {
   const isDev = import.meta.env.DEV; // Vite env check
   const RouterImpl = isDev ? BrowserRouter : HashRouter;
-  // useEffect(()=>{
-  //   console.log(window.api.sendMessage())
-  // }, [])
+  useEffect(()=>{
+    console.log(window.api)
+  }, [])
   return (
     <div className="bg-purple-800 w-screen">
        <Loading/>

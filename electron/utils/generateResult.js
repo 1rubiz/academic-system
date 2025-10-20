@@ -121,12 +121,14 @@ export const handleExport = async ({ sessionId, departmentId, session_name }) =>
       s.total_points += gp * cu;
       s.total_units += cu;
 
-      if (r.score > 39) {
-        s.credit_earned += cu;
-      } else {
-        s.credit_failed += cu;
-        if (!s.failed_courses) s.failed_courses = [];
-        s.failed_courses.push(r.course_code);
+      if(r.status !== 'NA'){
+        if (r.score > 39) {
+          s.credit_earned += cu;
+        } else {
+          s.credit_failed += cu;
+          if (!s.failed_courses) s.failed_courses = [];
+          s.failed_courses.push(r.course_code);
+        }
       }
 
     }

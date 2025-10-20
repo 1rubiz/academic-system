@@ -6,6 +6,7 @@ import { dirname } from 'path';
 import path from "path";
 import os from 'os'
 import fs from "fs";
+import { autoUpdater } from 'electron-updater'
 // import sqlite3 from 'sqlite3'
 import Database from "better-sqlite3";
 // import { DepartmentRepo } from './utils/db';
@@ -16,7 +17,13 @@ import { registerFacultyHandlers } from './utils/handlers/faculties.js';
 import { registerSessionHandlers } from './utils/handlers/sessions.js';
 import { registerResultsHandlers } from './utils/handlers/results.js';
 import { registerCarryoversHandlers } from './utils/handlers/carryovers.js';
-
+ registerDepartmentHandlers();
+  registerCourseHandlers();
+  registerStudentHandlers();
+  registerFacultyHandlers();
+  registerSessionHandlers();
+  registerResultsHandlers();
+  registerCarryoversHandlers();
 // Initialize local SQLite DB
 
 const __filename = fileURLToPath(import.meta.url);
@@ -27,7 +34,7 @@ const isDev = !app.isPackaged
 let loadingWindow;
 let mainWindow;
 export let db;
-const dbPath = path.join(process.cwd(), "academic_records.db");
+const dbPath = path.join(process.cwd(), "db/academic_records.db");
 export const excelPath = path.join(process.cwd(), `Result.xlsx`)
 export const markSheetpath = (str = '') => {
   let documentsDir;
@@ -237,22 +244,27 @@ app.whenReady().then(() => {
       createMainWindow()
     }
   })
-  autoUpdater.checkForUpdatesAndNotify()
+  if (!isDev) {
+    try {
+      console.log('🟢 Checking for updates...')
+      autoUpdater.checkForUpdates()
 
-  autoUpdater.on("update-available", () => {
-    mainWindow.webContents.send("update_available")
-  })
+      autoUpdater.on('update-available', () => {
+        console.log('🟡 Update available. Downloading silently...')
+      })
 
-  autoUpdater.on("update-downloaded", () => {
-    mainWindow.webContents.send("update_downloaded")
-  })
-  registerDepartmentHandlers();
-  registerCourseHandlers();
-  registerStudentHandlers();
-  registerFacultyHandlers();
-  registerSessionHandlers();
-  registerResultsHandlers();
-  registerCarryoversHandlers();
+      autoUpdater.on('update-downloaded', () => {
+        console.log('🟢 Update downloaded. Installing silently...')
+        autoUpdater.quitAndInstall(false, true)
+      })
+
+      autoUpdater.on('error', (err) => {
+        console.error('🔴 Auto update error:', err)
+      })
+    } catch (err) {
+      console.error('Update check failed:', err)
+    }
+  }
 })
 
 app.on('before-quit', () => db.close());
