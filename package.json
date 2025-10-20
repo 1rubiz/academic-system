@@ -26,7 +26,7 @@
   },
    "build": {
     "productName": "Academic System - Ruby",
-    "appId": "com.yourorg.academicrecords",
+    "appId": "io.github.linuxlite.academicrecords",
     "files": [
       "dist/**/*",
       "electron/**/*",
