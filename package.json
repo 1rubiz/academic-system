@@ -22,6 +22,7 @@
     "release": "electron-builder --publish always",
     "build:web": "vite build",
     "build:electron": "electron-builder",
+    "build:renderer": "vite build",
     "dist": "npm run build:web && npm run build:electron"
   },
    "build": {

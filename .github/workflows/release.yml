@@ -2,8 +2,8 @@ name: Build & Release
 
 on:
   push:
-    tags:
-      - 'v*'  # trigger on tags like v1.0.0
+    branches:
+      - 'main'  # trigger on tags like v1.0.0
 
 jobs:
   build:
