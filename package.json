@@ -2,6 +2,7 @@
   "name": "academic-records",
   "private": true,
   "version": "1.0.0",
+  "description": "Academic Records Desktop App",
   "author": {
     "name": "Ruby Izekor",
     "email": "1izekorruby@gmail.com"
@@ -74,7 +75,6 @@
     "better-sqlite3": "^12.4.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "electron": "^37.2.6",
     "exceljs": "^4.4.0",
     "lucide-react": "^0.539.0",
     "path": "^0.12.7",
@@ -95,6 +95,7 @@
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.21",
     "concurrently": "^9.2.0",
+    "electron": "^37.2.6",
     "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
     "electron-updater": "^6.6.2",
