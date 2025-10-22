@@ -4,7 +4,8 @@ on:
   push:
     tags:
       - 'v*' # trigger on tags like v1.0.0
-
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ${{ matrix.os }}
