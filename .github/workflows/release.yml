@@ -3,21 +3,23 @@ name: Build & Release
 on:
   push:
     tags:
-      - 'v*'  # trigger on tags like v1.0.0
+      - 'v*' # trigger on tags like v1.0.0
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         node: [20.x]
 
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -43,9 +45,10 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Install app deps (native modules)
+      - name: Install native modules (for Electron)
         run: npm run postinstall
 
+      # ⚙️ Package app for each OS
       - name: Package application
         run: |
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
@@ -57,28 +60,46 @@ jobs:
           fi
         shell: bash
 
+      # 🧾 List artifacts safely across all OSes
       - name: List artifacts
-        run: ls -la dist || ls -la release || find . -maxdepth 3 -type f -name "*AppImage" -o -name "*.exe" -o -name "*.dmg" -o -name "*.deb"
+        shell: bash
+        run: |
+          echo "Artifacts in dist folder:"
+          if [ -d dist ]; then
+            ls -la dist
+          elif [ -d release ]; then
+            ls -la release
+          else
+            find . -maxdepth 3 -type f \( -name "*.AppImage" -o -name "*.exe" -o -name "*.dmg" -o -name "*.deb" -o -name "*.zip" \)
+          fi
 
+      # 🏷️ Create or update GitHub Release
       - name: Create GitHub Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          body: "Automated release built by GitHub Actions"
+          draft: false
+          prerelease: false
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # 📦 Upload all platform artifacts
       - name: Upload release assets
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           files: |
             dist/*.AppImage
             dist/*.deb
             dist/*.exe
             dist/*.dmg
             dist/*.zip
-            dist/*.AppImage.blockmap
+            release/*.AppImage
+            release/*.deb
+            release/*.exe
+            release/*.dmg
+            release/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
