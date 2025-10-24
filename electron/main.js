@@ -6,7 +6,8 @@ import { dirname } from 'path';
 import path from "path";
 import os from 'os'
 import fs from "fs";
-import { autoUpdater } from 'electron-updater'
+import updater from 'electron-updater'
+const { autoUpdater } = updater
 // import sqlite3 from 'sqlite3'
 import Database from "better-sqlite3";
 // import { DepartmentRepo } from './utils/db';
