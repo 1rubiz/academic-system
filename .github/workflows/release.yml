@@ -49,16 +49,19 @@ jobs:
         run: npm run postinstall
 
       # ⚙️ Package app for each OS
-      - name: Package application
+      - name: Package and publish application
         run: |
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            npm run dist -- --win
+            npx electron-builder --win --publish always
           elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-            npm run dist -- --mac
+            npx electron-builder --mac --publish always
           else
-            npm run dist -- --linux
+            npx electron-builder --linux --publish always
           fi
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         shell: bash
+
 
       # 🧾 List artifacts safely across all OSes
       - name: List artifacts

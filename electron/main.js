@@ -35,7 +35,21 @@ const isDev = !app.isPackaged
 let loadingWindow;
 let mainWindow;
 export let db;
-const dbPath = path.join(process.cwd(), "db/academic_records.db");
+// const dbPath = path.join(process.cwd(), "db/academic_records.db");
+
+const userDataPath = app.getPath('userData')
+const dbFolder = path.join(userDataPath, 'db')
+const dbPath = path.join(dbFolder, 'academic_records.db')
+
+  // Ensure directory exists
+  if (!fs.existsSync(dbFolder)) {
+    fs.mkdirSync(dbFolder, { recursive: true })
+  }
+
+  // console.log('📂 DB Path:', dbPath)
+
+  // return dbPath
+
 export const excelPath = path.join(process.cwd(), `Result.xlsx`)
 export const markSheetpath = (str = '') => {
   let documentsDir;
