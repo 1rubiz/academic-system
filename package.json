@@ -43,9 +43,7 @@
       {
         "provider": "github",
         "owner": "1rubiz",
-        "repo": "academic-system",
-        "releaseType": "release",
-        "overwrite": true
+        "repo": "academic-system"
       }
     ],
     "win": {
